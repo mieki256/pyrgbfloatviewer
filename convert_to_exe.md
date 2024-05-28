@@ -40,7 +40,7 @@ python -m pip install nuitka
 Nuitka でexeファイル化する。
 
 ```
-python -m nuitka --standalone --enable-plugin=tk-inter --windows-disable-console pyrgbfloatviewer.pyw
+python -m nuitka --standalone --enable-plugin=tk-inter --windows-disable-console --windows-icon-from-ico=icon.ico pyrgbfloatviewer.pyw
 ```
 
 仮想環境から抜ける。
@@ -87,7 +87,10 @@ setup.py を作成。
 from distutils.core import setup
 import py2exe
 
-setup(windows = [{"script": "pyrgbfloatviewer.pyw"}])
+setup(
+    windows = [
+    {"script": "pyrgbfloatviewer.pyw"},
+    ])
 ```
 
 py2exe でexe化する。

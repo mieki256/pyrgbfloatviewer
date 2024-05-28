@@ -69,7 +69,7 @@ pythonw pyrgbfloatviewer.pyw
 
 試しにexeファイル化もしてみた。
 
-1. pyrgbfloatviewer.dist/ フォルダ一式を別環境にコピー。
+1. to\_exe/pyrgbfloatviewer.dist/ フォルダ一式を別環境にコピー。
 2. 中に入っている pyrgbfloatviewer.exe を実行すれば動く。
 
 [exeファイルへの変換について](./convert_to_exe.md)

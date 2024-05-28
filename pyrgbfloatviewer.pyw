@@ -1,6 +1,6 @@
 #!/usr/bin/python3.10
 # -*- mode: python; Encoding: utf-8; coding: utf-8 -*-
-# Last updated: <2024/05/27 09:05:30 +0900>
+# Last updated: <2024/05/29 04:23:14 +0900>
 """
 RGB float viewer
 
@@ -304,6 +304,7 @@ def on_click(x, y, button, pressed):
 root = tk.Tk()
 root.title("RGB Float viewer")
 # root.geometry("600x400")
+# root.iconbitmap(default="icon.ico")
 
 root.attributes("-topmost", True)
 root.configure(cursor="arrow")

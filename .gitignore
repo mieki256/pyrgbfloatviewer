@@ -3,3 +3,5 @@
 .vscode/launch.json
 venv
 venv/*
+to_exe/venv310
+to_exe/venv310/*
