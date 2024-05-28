@@ -1,6 +1,6 @@
 #!/usr/bin/python3.10
 # -*- mode: python; Encoding: utf-8; coding: utf-8 -*-
-# Last updated: <2024/05/29 04:23:14 +0900>
+# Last updated: <2024/05/29 06:02:24 +0900>
 """
 RGB float viewer
 
@@ -11,9 +11,13 @@ Middle Mouse Button : Paste clipboard contents
 Ctrl + "+" / "-" : Change font fize
 Ctrl+q : Exit
 
-Windows10 x64 22H2 + Python 3.10.10 64bit + tkinter
+Version: 1.1.0
 License : CC0 / Public Domain
 Author : mieki256
+
+* Windows10 x64 22H2 + Python 3.10.10 64bit + tkinter
+* PyAutoGUI 0.9.54
+* pynput 1.6.8
 """
 
 import tkinter as tk
@@ -111,7 +115,7 @@ def get_rgb_float_str(r, g, b):
 def add_rgb_to_text(r, g, b):
     """Add RGB Float string to the end of the text widget."""
     s = get_rgb_float_str(r, g, b)
-    txtw.insert(tk.END, "%s,\n" % (s))
+    txtw.insert(tk.INSERT, f"{s},\n")
 
 
 def get_line_str(s):
@@ -130,10 +134,6 @@ def change_color_panel(r, g, b):
     bi = int(b * 255)
     rgbfloat = get_rgb_float_str(r, g, b)
     rgbint = "%d, %d, %d" % (ri, gi, bi)
-    # rgbf_ent.delete(0, tk.END)
-    # rgbf_ent.insert(0, "%s" % (rgbfloat))
-    # rgb_ent.delete(0, tk.END)
-    # rgb_ent.insert(0, "%s" % (rgbint))
     rgbf_str.set(rgbfloat)
     rgb_str.set(rgbint)
     color_preveiw.config(bg="#%02x%02x%02x" % (ri, gi, bi))
@@ -159,9 +159,28 @@ def get_cursor_pos():
         change_color_panel(r, g, b)
 
 
+def chnage_color_on_text(e=None):
+    s = txtw.get("insert linestart", "insert lineend")
+    r, g, b = get_rgb_float_values(get_line_str(s.strip()))
+    if r is not None:
+        status_var.set("Found RGB Float")
+        change_color_panel(r, g, b)
+        old_col = color_preveiw.cget("bg")
+        color = colorchooser.askcolor(color=old_col, parent=root)
+        if color[0]:
+            r, g, b = color[0]
+            r = float(int(r)) / 255.0
+            g = float(int(g)) / 255.0
+            b = float(int(b)) / 255.0
+            change_color_panel(r, g, b)
+            relace_rgb_float(s, r, g, b)
+    else:
+        status_var.set("Not found RGB Float")
+
+
 def get_rgb_float_values(s):
     """Get RGB Float values from a string."""
-    m = re.search(r"([01]?\.\d+)\s*,\s*([01]?\.\d+)\s*,\s*([01]?\.\d+)", s)
+    m = re.search(r"([01]{1}\.\d+)\s*,\s*([01]{1}\.\d+)\s*,\s*([01]{1}\.\d+)", s)
     if m:
         rs, gs, bs = m.groups()
         r = float(rs)
@@ -172,9 +191,22 @@ def get_rgb_float_values(s):
     return (None, None, None)
 
 
+def relace_rgb_float(s, r, g, b):
+    m = re.match(
+        r"^([^01]*)([01]{1}\.\d+)\s*,\s*([01]{1}\.\d+)\s*,\s*([01]{1}\.\d+)(.*)", s
+    )
+    if m:
+        fwd, _, _, _, bwd = m.groups()
+        txtw.delete("insert linestart", "insert lineend")
+        nstr = "%s%s%s" % (fwd, get_rgb_float_str(r, g, b), bwd)
+        txtw.insert(tk.INSERT, nstr)
+        return True
+    return False
+
+
 def clear_all_text():
     """Clear in text widget."""
-    txtw.delete("0.0", tk.END)
+    txtw.delete("1.0", tk.END)
 
 
 def rgb2y(r, g, b):
@@ -205,9 +237,9 @@ def insert_coloring_line(s):
 
 def coloring(e=None):
     """Set the background color of each row."""
-    all_text = txtw.get(0.0, tk.END)
+    all_text = txtw.get("1.0", tk.END).strip()
     lines = all_text.split("\n")
-    txtw.delete(0.0, tk.END)  # clear all text
+    txtw.delete("1.0", tk.END)  # clear all text
     for s in lines:
         insert_coloring_line(s)
 
@@ -317,7 +349,8 @@ rgbfrm = tk.Frame(root)
 picker_lbl = tk.Label(
     rgbfrm, text=DEF_MSG, width=25, borderwidth=3, relief=tk.GROOVE, cursor="target"
 )
-colsel_btn = tk.Button(rgbfrm, text="Choose color", command=open_color_chooser)
+colsel_btn = tk.Button(rgbfrm, text="Add color", command=open_color_chooser)
+edit_btn = tk.Button(rgbfrm, text="Edit color", command=chnage_color_on_text)
 
 rgbf_str = tk.StringVar()
 rgb_str = tk.StringVar()
@@ -350,16 +383,18 @@ color_preveiw.grid(row=0, column=0, columnspan=2, sticky="nsew")
 rgbfrm.grid(row=1, column=0, sticky="nsew", padx=8, pady=8)
 picker_lbl.grid(row=0, column=0, rowspan=2, sticky="nsew", padx=4)
 colsel_btn.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=4)
-rgbf_lbl.grid(row=0, column=2, padx=4)
-rgb_lbl.grid(row=1, column=2, padx=4)
-rgbf_ent.grid(row=0, column=3, sticky="nsew", padx=4)
-rgb_ent.grid(row=1, column=3, sticky="nsew", padx=4)
+edit_btn.grid(row=0, column=2, rowspan=2, sticky="nsew", padx=4)
+rgbf_lbl.grid(row=0, column=3, padx=4)
+rgb_lbl.grid(row=1, column=3, padx=4)
+rgbf_ent.grid(row=0, column=4, sticky="nsew", padx=4)
+rgb_ent.grid(row=1, column=4, sticky="nsew", padx=4)
 rgbfrm.grid_rowconfigure(0, weight=0)
 rgbfrm.grid_rowconfigure(1, weight=0)
 rgbfrm.grid_columnconfigure(0, weight=0)
 rgbfrm.grid_columnconfigure(1, weight=0)
 rgbfrm.grid_columnconfigure(2, weight=0)
-rgbfrm.grid_columnconfigure(3, weight=1)
+rgbfrm.grid_columnconfigure(3, weight=0)
+rgbfrm.grid_columnconfigure(4, weight=1)
 
 btnfrm.grid(row=3, column=0, sticky="ew", padx=4, pady=4)
 coloring_btn.pack(side=tk.LEFT, padx=4)

@@ -5,3 +5,5 @@ venv
 venv/*
 to_exe/venv310
 to_exe/venv310/*
+to_exe/pyrgbfloatviewer.build
+to_exe/pyrgbfloatviewer.build/*
